@@ -11,6 +11,7 @@ Gem::Specification.new do |s|
   s.homepage    = "http://github.com/Achillefs/elscripto"
   s.summary     = %q{Console window group automation for developers}
   s.description = %q{Console window group automation for developers}
+  spec.license  = 'MIT'
 
   s.rubyforge_project = "elscripto"
   s.files         = `git ls-files`.split("\n")
