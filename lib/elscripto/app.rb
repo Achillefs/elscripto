@@ -2,7 +2,7 @@ require 'yaml'
 require 'rbconfig'
 
 module Elscripto # :nodoc:
-  GLOBAL_CONF_PATH = File.join(File.dirname(__FILE__),'..','..','config') # dev only this, need to update
+  GLOBAL_CONF_PATH = File.join('/usr','local','etc')
   
   class AlreadyInitializedError < Exception # :nodoc:
     def initialize
@@ -33,6 +33,7 @@ module Elscripto # :nodoc:
       @commands = []
       @generated_script = ""
       @platform = get_platform(Config::CONFIG['host_os'])
+      first_run?
       @enviroment = opts.delete(:enviroment) || :production
       config_file = opts_file ? opts_file : CONFIG_FILE
       raise ArgumentError.new "Elscripto needs a config file spectacularrr" unless File.exists?(config_file)
@@ -66,15 +67,31 @@ module Elscripto # :nodoc:
         @generated_script<< commands.map { |cmd| %{tell application "System Events" to keystroke "t" using command down\ndo script "clear && echo \\"-- Running #{cmd.name} Spectacularrr --\\" && #{cmd.system_call}" in front window} }.join("\n")
         @generated_script<< "\nend tell"
         if self.enviroment == :production
+        begin
           tempfile = File.join('.','elscripto.tmp')
           File.open(tempfile,'w') { |f| f.write(@generated_script) }
-          exec(`osascript #{tempfile}`)
+          resp = `osascript #{tempfile}`
+        ensure
           File.delete(tempfile)
+        end
         else
           @generated_script
         end
       else
         raise Elscripto::UnsupportedOSException.new(self.platform)
+      end
+    end
+    
+    def first_run?
+      case platform
+      when :osx
+        global_conf_file = File.join(GLOBAL_CONF_PATH,'elscripto.conf.yml')
+        unless File.exists?(global_conf_file)
+          File.open(global_conf_file,'w') do |f|
+            f.write(File.read(File.join(File.dirname(__FILE__),'..','..','config','elscripto.conf.yml')))
+          end
+          puts "Wrote global configuration to #{global_conf_file}"
+        end
       end
     end
     

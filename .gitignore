@@ -5,3 +5,4 @@ pkg/*
 *.tmproj
 .rvmrc
 .rspec
+.elscripto

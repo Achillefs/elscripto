@@ -17,7 +17,13 @@ def run(command)
       end
     when 'start'
       if File.exists? Elscripto::App::CONFIG_FILE
-        app = Elscripto::App.new(Elscripto::App::CONFIG_FILE)
+        begin
+          app = Elscripto::App.new(Elscripto::App::CONFIG_FILE)
+          puts 'Starting ElScripto Spctacularrr!'
+          app.exec!
+        rescue Elscripto::NoDefinitionsError
+          puts "No script definitions found in .elscripto"
+        end
       else
         print "No configuration found, initializing..."
         Elscripto::App.init!
