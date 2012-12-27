@@ -1,5 +1,6 @@
 require 'yaml'
 require 'rbconfig'
+require 'nutrun-string'
 
 module Elscripto # :nodoc:
   GLOBAL_CONF_PATHS = {
@@ -94,7 +95,7 @@ module Elscripto # :nodoc:
           File.open(global_conf_file,'w') do |f|
             f.write(File.read(File.join(File.dirname(__FILE__),'..','..','config','elscripto.conf.yml')))
           end
-          puts "Wrote global configuration to #{global_conf_file}"
+          puts "Wrote global configuration to #{global_conf_file}".yellow.bg_black
         end
       end
     end
