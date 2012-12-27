@@ -1,0 +1,33 @@
+#!/usr/bin/env ruby
+def run(command)
+  executable_name = File.basename($PROGRAM_NAME)
+  require 'rubygems'
+  require 'elscripto'
+  
+  if command != nil and %{init start}.include?(command) # valid command?
+    case command
+    when 'init'
+      print "\nInitializing elscripto..."
+      begin
+        Elscripto::App.init!
+        puts " done."
+        puts "Before continuing, update ./.elscripto with the desired script definitions\n\n"
+      rescue Elscripto::AlreadyInitializedError
+        puts " nah, it's already there!\n\n"
+      end
+    when 'start'
+      if File.exists? Elscripto::App::CONFIG_FILE
+        app = Elscripto::App.new(Elscripto::App::CONFIG_FILE)
+      else
+        print "No configuration found, initializing..."
+        Elscripto::App.init!
+        puts "done."
+        puts "Before continuing, update ./.elscripto with the desired script definitions"
+      end
+    end
+  else # valid command?
+    puts "Usage: #{executable_name} init|start"
+  end # valid command?
+end
+
+run(ARGV[0]) unless ENV['NO_RUN']

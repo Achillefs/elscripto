@@ -1,0 +1,9 @@
+---
+  spork: spork
+  spork:unit: spork testunit
+  autotest: autotest
+  rails:server: 'rails s'
+  rails:console: 'rails c'
+  rails:logtail: 'rake log:clear && tail -f log/development.log'
+  rails:compass: 'compass watch'
+  rails:watchr: 'watchr ./config/specs.watchr'

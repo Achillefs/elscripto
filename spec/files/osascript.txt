@@ -1,0 +1,11 @@
+tell application "Terminal"
+activate
+tell application "System Events" to keystroke "t" using command down
+do script "clear && echo \"-- Running spork Spectacularrr --\" && spork" in front window
+tell application "System Events" to keystroke "t" using command down
+do script "clear && echo \"-- Running autotest Spectacularrr --\" && autotest" in front window
+tell application "System Events" to keystroke "t" using command down
+do script "clear && echo \"-- Running rails:server Spectacularrr --\" && rails s" in front window
+tell application "System Events" to keystroke "t" using command down
+do script "clear && echo \"-- Running rails:console Spectacularrr --\" && rails c" in front window
+end tell

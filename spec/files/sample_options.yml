@@ -1,0 +1,6 @@
+---
+  commands:
+    - spork
+    - autotest
+    - rails:server
+    - rails:console

@@ -1,0 +1,5 @@
+---
+  commands:
+    - spork
+    - name: rails:logs
+      command: 'rake log:clear' 
