@@ -1,38 +1,40 @@
 #!/usr/bin/env ruby
+require 'rubygems'
+require 'elscripto'
+require 'nutrun-string'
+
 def run(command)
   executable_name = File.basename($PROGRAM_NAME)
-  require 'rubygems'
-  require 'elscripto'
   
   if command != nil and %{init start}.include?(command) # valid command?
     case command
     when 'init'
-      print "\nInitializing elscripto..."
+      print "\nInitializing elscripto...".yellow
       begin
         Elscripto::App.init!
         puts " done."
-        puts "Before continuing, update ./.elscripto with the desired script definitions\n\n"
+        puts "Before continuing, update ./.elscripto with the desired script definitions\n\n".yellow
       rescue Elscripto::AlreadyInitializedError
-        puts " nah, it's already there!\n\n"
+        puts " nah, it's already there!\n".green
       end
     when 'start'
       if File.exists? Elscripto::App::CONFIG_FILE
         begin
           app = Elscripto::App.new(Elscripto::App::CONFIG_FILE)
-          puts 'Starting ElScripto Spctacularrr!'
+          puts 'Starting ElScripto Spctacularrr!'.green
           app.exec!
         rescue Elscripto::NoDefinitionsError
-          puts "No script definitions found in .elscripto"
+          puts "\nNo script definitions found in .elscripto\n".red
         end
       else
-        print "No configuration found, initializing..."
+        print "No configuration found, initializing...".yellow
         Elscripto::App.init!
-        puts "done."
-        puts "Before continuing, update ./.elscripto with the desired script definitions"
+        puts "done.".green
+        puts "Before continuing, update ./.elscripto with the desired script definitions".yello
       end
     end
   else # valid command?
-    puts "Usage: #{executable_name} init|start"
+    puts "\nUsage: #{executable_name} init|start\n".white
   end # valid command?
 end
 
