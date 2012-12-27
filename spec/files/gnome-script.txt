@@ -1,0 +1,1 @@
+gnome-terminal --tab --title 'spork' -e 'spork' --tab --title 'autotest' -e 'autotest' --tab --title 'rails:server' -e 'rails s' --tab --title 'rails:console' -e 'rails c'

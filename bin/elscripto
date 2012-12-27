@@ -23,10 +23,8 @@ def run(command)
           app = Elscripto::App.new(Elscripto::App::CONFIG_FILE)
           puts 'Starting ElScripto Spctacularrr!'.green
           app.exec!
-        rescue Elscripto::NoDefinitionsError
-          puts "\nNo script definitions found in .elscripto\n".red
-        rescue Elscripto::UnsupportedOSException
-          puts "\n#{Elscripto::App.get_platform(RbConfig::CONFIG['host_os'])} is not currently supported. Sorry\n".red
+        rescue Elscripto::NoDefinitionsError,Elscripto::UnsupportedOSError,Elscripto::LaunchFailedError => e
+          puts "\n#{e.message}\n".red
         end
       else
         print "No configuration found, initializing...".yellow

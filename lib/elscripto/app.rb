@@ -8,21 +8,27 @@ module Elscripto # :nodoc:
     :linux => File.join(ENV['HOME'],'.config')
   }
   
+  class LaunchFailedError < Exception # :nodoc:
+    def initialize
+      super "Your windows have failed to launch. Please check your command definitions"
+    end
+  end
+  
   class AlreadyInitializedError < Exception # :nodoc:
     def initialize
-      @message = ".elscripto found, project already initialized"
+      super "The configuration file already exists"
     end
   end
   
   class NoDefinitionsError < Exception # :nodoc:
     def initialize
-      @message = "No definitions in your configuration file. What's the deal, guy?"
+      super "No definitions in your configuration file. What's the deal, guy?"
     end
   end
   
-  class UnsupportedOSException < Exception # :nodoc:
+  class UnsupportedOSError < Exception # :nodoc:
     def initialize(os)
-      @message = "Sorry, Elscripto does not currently support #{os}"
+      super "Sorry, Elscripto does not currently support #{os}"
     end
   end
   
@@ -68,21 +74,35 @@ module Elscripto # :nodoc:
       when :osx
         @generated_script = %{tell application "Terminal"\n}
         @generated_script<< %{activate\n}
-        @generated_script<< commands.map { |cmd| %{tell application "System Events" to keystroke "t" using command down\ndo script "clear && echo \\"-- Running #{cmd.name} Spectacularrr --\\" && #{cmd.system_call}" in front window} }.join("\n")
+        @generated_script<< commands.map { |cmd| %{tell application "System Events" to keystroke "t" using command down\ndelay 0.5\ndo script "clear && echo \\"-- Running #{cmd.name} Spectacularrr --\\" && #{cmd.system_call}" in front window} }.join("\n")
         @generated_script<< "\nend tell"
         if self.enviroment == :production
-        begin
-          tempfile = File.join(ENV['TMPDIR'],'elscripto.tmp')
-          File.open(tempfile,'w') { |f| f.write(@generated_script) }
-          resp = `osascript #{tempfile}`
-        ensure
-          File.delete(tempfile)
-        end
+          begin
+            tempfile = File.join(ENV['TMPDIR'],'elscripto.tmp')
+            File.open(tempfile,'w') { |f| f.write(@generated_script) }
+            raise Elscripto::LaunchFailedError.new unless system("osascript #{tempfile}")
+          ensure
+            File.delete(tempfile)
+          end
         else
           @generated_script
         end
+      # Currently only works on Gnome desktop, although implementing this for other terminal apps is trivial
+      # Example script: gnome-terminal --tab -e "tail -f somefile" --tab -e "some_other_command"
+      when :linux
+        if system('which gnome-terminal') 
+          @generated_script = %{gnome-terminal }
+          @generated_script<< commands.map { |cmd| %{--tab --title '#{cmd.name}' -e '#{cmd.system_call}'} }.join(" ")
+          if self.enviroment == :production
+            raise Elscripto::LaunchFailedError.new unless system(@generated_script)
+          else
+            @generated_script
+          end
+        else
+          Elscripto::UnsupportedOSError.new('your flavour of linux')
+        end
       else
-        raise Elscripto::UnsupportedOSException.new(self.platform)
+        raise Elscripto::UnsupportedOSError.new(self.platform)
       end
     end
     

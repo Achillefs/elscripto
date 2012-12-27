@@ -44,19 +44,25 @@ describe Elscripto::App do
   end
   
   describe 'exec!' do
-    describe 'on osx' do
       before { subject.exec! }
-      it { subject.generated_script.should eq(File.read('spec/files/osascript.txt')) }
-    end
+      it {
+        platform = Elscripto::App.get_platform(RbConfig::CONFIG['host_os'])
+        case platform
+        when :os
+          subject.generated_script.should eq(File.read('spec/files/osascript.txt'))
+        when :linux
+          subject.generated_script.should eq(File.read('spec/files/gnome-script.txt'))
+        end
+        
+      }
     
     describe 'on an unsupported platform' do
       before { subject.platform = :windows }
-      it { expect { subject.exec! }.to raise_error(Elscripto::UnsupportedOSException) }
+      it { expect { subject.exec! }.to raise_error(Elscripto::UnsupportedOSError) }
     end
     
     describe "with no definitions" do
-      subject { Elscripto::App.new 'spec/files/empty.yml' }
-      it { expect { subject }.to raise_error(Elscripto::NoDefinitionsError) }
+      it { expect { Elscripto::App.new('spec/files/empty.yml') }.to raise_error(Elscripto::NoDefinitionsError) }
     end
   end
 end
