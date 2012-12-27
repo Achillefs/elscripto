@@ -1,6 +1,6 @@
 # El Scripto Spectacularrr
 
-elscripto is a command line automator. It was initially written to start up a few OSX Terminal tabs that I used for Rails development. At first it was just a ruby script with a few hardcoded commands, but it slowly evolved the nifty little configurable little command line utility you see here.
+elscripto is a command line automator. It was initially written to start up a few OSX Terminal tabs that I used for Rails development. At first it was just a ruby script with a few hardcoded commands, but it slowly evolved into the nifty little configurable command line utility you see here.
 
 ## Platforms
 
@@ -56,3 +56,9 @@ Elscripto should work on all major platforms (yes, even Windows), let not my lim
 3. Commit your changes (`git commit -am 'Add some feature'`)
 4. Push to the branch (`git push origin my-new-feature`)
 5. Create new Pull Request
+
+## Changelog
+
+  * 0.5.0 KDE support
+  * 0.4.0 GNOME support
+  * 0.3.0 OSX support
