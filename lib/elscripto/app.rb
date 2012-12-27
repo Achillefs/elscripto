@@ -2,7 +2,10 @@ require 'yaml'
 require 'rbconfig'
 
 module Elscripto # :nodoc:
-  GLOBAL_CONF_PATH = File.join('/usr','local','etc')
+  GLOBAL_CONF_PATHS = {
+    :osx => File.join('/usr','local','etc'),
+    :linux => File.join(ENV['HOME'],'.config')
+  }
   
   class AlreadyInitializedError < Exception # :nodoc:
     def initialize
@@ -32,7 +35,7 @@ module Elscripto # :nodoc:
     def initialize opts_file, opts = {}
       @commands = []
       @generated_script = ""
-      @platform = get_platform(Config::CONFIG['host_os'])
+      @platform = self.class.get_platform(Config::CONFIG['host_os'])
       first_run?
       @enviroment = opts.delete(:enviroment) || :production
       config_file = opts_file ? opts_file : CONFIG_FILE
@@ -68,7 +71,7 @@ module Elscripto # :nodoc:
         @generated_script<< "\nend tell"
         if self.enviroment == :production
         begin
-          tempfile = File.join('.','elscripto.tmp')
+          tempfile = File.join(ENV['TMPDIR'],'elscripto.tmp')
           File.open(tempfile,'w') { |f| f.write(@generated_script) }
           resp = `osascript #{tempfile}`
         ensure
@@ -83,9 +86,10 @@ module Elscripto # :nodoc:
     end
     
     def first_run?
+      global_conf_file = File.join(GLOBAL_CONF_PATHS[platform],'elscripto.conf.yml')
+      
       case platform
-      when :osx
-        global_conf_file = File.join(GLOBAL_CONF_PATH,'elscripto.conf.yml')
+      when :osx,:linux
         unless File.exists?(global_conf_file)
           File.open(global_conf_file,'w') do |f|
             f.write(File.read(File.join(File.dirname(__FILE__),'..','..','config','elscripto.conf.yml')))
@@ -95,22 +99,28 @@ module Elscripto # :nodoc:
       end
     end
     
-    def self.init!
-      if File.exists?(CONFIG_FILE)
-        raise Elscripto::AlreadyInitializedError.new
-      else
-        File.open(CONFIG_FILE,'w') do |f|
-          f.write File.read(File.join(File.dirname(__FILE__),'..','..','config','elscripto.init.yml')).gsub('{{GLOBAL_CONF_PATH}}',Elscripto::GLOBAL_CONF_PATH + '/elscripto.conf.yml')
+    class << self
+      def init!
+        if File.exists?(CONFIG_FILE)
+          raise Elscripto::AlreadyInitializedError.new
+        else
+          File.open(CONFIG_FILE,'w') do |f|
+            f.write File.read(File.join(File.dirname(__FILE__),'..','..','config','elscripto.init.yml')).gsub('{{GLOBAL_CONF_PATH}}',self.global_conf_path + '/elscripto.conf.yml')
+          end
         end
       end
-    end
-    
-    # Determine the platform we're running on
-    def get_platform(host_os)
-      return :osx if host_os =~ /darwin/
-      return :linux if host_os =~ /linux/
-      return :windows if host_os =~ /mingw32|mswin32/
-      return :unknown
+
+      def global_conf_path
+        Elscripto::GLOBAL_CONF_PATHS[self.get_platform(Config::CONFIG['host_os'])]
+      end
+
+      # Determine the platform we're running on
+      def get_platform(host_os)
+        return :osx if host_os =~ /darwin/
+        return :linux if host_os =~ /linux/
+        return :windows if host_os =~ /mingw32|mswin32/
+        return :unknown
+      end
     end
   end
 end

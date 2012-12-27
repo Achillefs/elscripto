@@ -10,7 +10,7 @@ module Elscripto
     end
   protected
     def builtin_commands
-      YAML.load_file(File.join Elscripto::GLOBAL_CONF_PATH, 'elscripto.conf.yml')
+      YAML.load_file(File.join Elscripto::App.global_conf_path, 'elscripto.conf.yml')
     end
     
     def blank? var

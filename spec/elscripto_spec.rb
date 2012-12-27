@@ -9,7 +9,7 @@ describe Elscripto::App do
     
     it { File.exists?(@conf_file) }
     it { expect { YAML.load(@conf_file) }.to_not raise_error }
-    it { File.read(@conf_file).include?(Elscripto::GLOBAL_CONF_PATH).should eq(true) }
+    it { File.read(@conf_file).include?(Elscripto::App.global_conf_path).should eq(true) }
     
     it 'should not initialize twice' do
       expect { Elscripto::App.init! }.to raise_error(Elscripto::AlreadyInitializedError)
@@ -38,10 +38,9 @@ describe Elscripto::App do
   end
   
   describe 'platform recongition' do
-    it { subject.get_platform("darwin10.8.0").should eq(:osx) }
-    it { subject.get_platform("x86_64-linux").should eq(:linux) }
-    it { subject.get_platform("mswin32").should eq(:windows) }
-    it { subject.platform.should eq(:osx) } # I'm running this on an AssBook
+    it { subject.class.get_platform("darwin10.8.0").should eq(:osx) }
+    it { subject.class.get_platform("x86_64-linux").should eq(:linux) }
+    it { subject.class.get_platform("mswin32").should eq(:windows) }
   end
   
   describe 'exec!' do
