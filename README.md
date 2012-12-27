@@ -60,5 +60,7 @@ Elscripto should work on all major platforms (yes, even Windows), let not my lim
 ## Changelog
 
   * 0.5.0 KDE support
-  * 0.4.0 GNOME support
-  * 0.3.0 OSX support
+  * 0.4.0 Custom configuration files support
+  * 0.3.0 GNOME support
+  * 0.2.0 OSX support
+  * 0.1.0 Initial release
