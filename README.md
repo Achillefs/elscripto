@@ -4,8 +4,8 @@ elscripto is a command line automator. It was initially written to start up a fe
 
 ## Platforms
 
-This gem currently works on Mac OSX, and Linux with Gnome desktop.
-It uses Applescript and gnome-terminal shell automation depending on the platform.
+This gem currently works on Mac OSX, and Linux with Gnome or KDE desktops.
+It uses Applescript, gnome-terminal and konsole automation via qdbus depending on the platform.
 
 ## Installation
 

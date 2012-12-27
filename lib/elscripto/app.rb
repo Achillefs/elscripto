@@ -87,10 +87,10 @@ module Elscripto # :nodoc:
         else
           @generated_script
         end
-      # Currently only works on Gnome desktop, although implementing this for other terminal apps is trivial
-      # Example script: gnome-terminal --tab -e "tail -f somefile" --tab -e "some_other_command"
       when :linux
-        if system('which gnome-terminal') 
+	# Gnome desktops
+	# Example script: gnome-terminal --tab -e "tail -f somefile" --tab -e "some_other_command"
+        if self.class.is_gnome?
           @generated_script = %{gnome-terminal }
           @generated_script<< commands.map { |cmd| %{--tab --title '#{cmd.name}' -e '#{cmd.system_call}'} }.join(" ")
           if self.enviroment == :production
@@ -98,7 +98,43 @@ module Elscripto # :nodoc:
           else
             @generated_script
           end
-        else
+	# KDE Desktops, using qdbus
+	# CDCMD='cd ~/elscripto'
+	# elCommands=('htop' 'tail -f LICENSE.txt' 'tail -f README.md');
+	# for i in "${elCommands[@]}"
+	# do
+	#   session=$(qdbus org.kde.konsole /Konsole  newSession)
+	#   qdbus org.kde.konsole /Sessions/${session} sendText "${CDCMD}"
+	#   qdbus org.kde.konsole /Sessions/${session} sendText $'\n'
+	#   qdbus org.kde.konsole /Sessions/${session} sendText "${i}"
+	#   qdbus org.kde.konsole /Sessions/${session} sendText $'\n'
+	#   qdbus org.kde.konsole /Sessions/${session} setMonitorActivity true
+	# done
+	elsif self.class.is_kde?
+	  @generated_script = %{CDCMD='cd #{Dir.pwd}'\n}
+	  @generated_script<< "elCommands=("
+	  @generated_script<< commands.map { |cmd| %{'#{cmd.system_call}'} }.join(" ")
+	  @generated_script<< ")\n"
+	  @generated_script<< %{for i in "${elCommands[@]}"
+do
+  session=$(qdbus org.kde.konsole /Konsole  newSession)
+  qdbus org.kde.konsole /Sessions/${session} sendText "${CDCMD}"
+  qdbus org.kde.konsole /Sessions/${session} sendText $'\n'
+  qdbus org.kde.konsole /Sessions/${session} sendText "${i}"
+  qdbus org.kde.konsole /Sessions/${session} sendText $'\n'
+  qdbus org.kde.konsole /Sessions/${session} setMonitorActivity true
+done}
+          if self.enviroment == :production
+          begin
+            tempfile = File.join('/','tmp','elscripto.tmp')
+            File.open(tempfile,'w') { |f| f.write(@generated_script) }
+            raise Elscripto::LaunchFailedError.new unless system("/bin/bash #{tempfile}")
+          ensure
+            File.delete(tempfile)
+          end
+            @generated_script
+          end
+	else
           Elscripto::UnsupportedOSError.new('your flavour of linux')
         end
       else
@@ -132,11 +168,19 @@ module Elscripto # :nodoc:
           end
         end
       end
-
+      
+      def is_gnome?
+        system('which gnome-terminal > /dev/null') 
+      end
+      
+      def is_kde?
+        system('which konsole > /dev/null') 
+      end
+      
       def global_conf_path
         Elscripto::GLOBAL_CONF_PATHS[self.get_platform(RbConfig::CONFIG['host_os'])]
       end
-
+      
       # Determine the platform we're running on
       def get_platform(host_os)
         return :osx if host_os =~ /darwin/

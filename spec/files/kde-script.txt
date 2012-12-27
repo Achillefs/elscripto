@@ -1,0 +1,13 @@
+CDCMD='cd /home/achilles/elscripto'
+elCommands=('spork' 'autotest' 'rails s' 'rails c')
+for i in "${elCommands[@]}"
+do
+  session=$(qdbus org.kde.konsole /Konsole  newSession)
+  qdbus org.kde.konsole /Sessions/${session} sendText "${CDCMD}"
+  qdbus org.kde.konsole /Sessions/${session} sendText $'
+'
+  qdbus org.kde.konsole /Sessions/${session} sendText "${i}"
+  qdbus org.kde.konsole /Sessions/${session} sendText $'
+'
+  qdbus org.kde.konsole /Sessions/${session} setMonitorActivity true
+done

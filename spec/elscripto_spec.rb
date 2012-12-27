@@ -44,17 +44,20 @@ describe Elscripto::App do
   end
   
   describe 'exec!' do
-      before { subject.exec! }
-      it {
-        platform = Elscripto::App.get_platform(RbConfig::CONFIG['host_os'])
-        case platform
-        when :os
-          subject.generated_script.should eq(File.read('spec/files/osascript.txt'))
-        when :linux
+    before { subject.exec! }
+    it 'generate the correct output depending on platform' do
+      platform = Elscripto::App.get_platform(RbConfig::CONFIG['host_os'])
+      case platform
+      when :os
+        subject.generated_script.should eq(File.read('spec/files/osascript.txt'))
+      when :linux
+        if Elscripto::App.is_gnome?
           subject.generated_script.should eq(File.read('spec/files/gnome-script.txt'))
+        elsif Elscripto::App.is_kde?
+          subject.generated_script.should eq(File.read('spec/files/kde-script.txt'))
         end
-        
-      }
+      end
+    end
     
     describe 'on an unsupported platform' do
       before { subject.platform = :windows }
