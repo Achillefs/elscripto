@@ -10,7 +10,12 @@ module Elscripto
     end
   protected
     def builtin_commands
-      YAML.load_file(File.join Elscripto::App.global_conf_path, 'elscripto.conf.yml')
+      return @commands if @commands 
+      @commands = {}
+      Dir[File.join(Elscripto::App.global_conf_path,'*.conf')].each do |file|
+        @commands.merge! YAML.load_file(file)
+      end
+      @commands
     end
     
     def blank? var

@@ -6,7 +6,7 @@ require 'nutrun-string'
 def run(command)
   executable_name = File.basename($PROGRAM_NAME)
   
-  if command != nil and %{init start}.include?(command) # valid command?
+  if command != nil and %{init start --version}.include?(command) # valid command?
     case command
     when 'init'
       print "\nInitializing elscripto...".yellow
@@ -32,6 +32,9 @@ def run(command)
         puts "done.".green
         puts "Before continuing, update ./.elscripto with the desired script definitions".yellow
       end
+    when '--version', '-v'
+      puts "\n#{executable_name.capitalize} version #{Elscripto::VERSION}".white
+      puts "(c) 2012, Achillefs Charmpilas\n".green
     end
   else # valid command?
     puts "\nUsage: #{executable_name} init|start\n".white

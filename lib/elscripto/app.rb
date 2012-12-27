@@ -4,8 +4,8 @@ require 'nutrun-string'
 
 module Elscripto # :nodoc:
   GLOBAL_CONF_PATHS = {
-    :osx => File.join('/usr','local','etc'),
-    :linux => File.join(ENV['HOME'],'.config')
+    :osx => File.join('/usr','local','etc','elscripto'),
+    :linux => File.join(ENV['HOME'],'.config','elscripto')
   }
   
   class LaunchFailedError < Exception # :nodoc:
@@ -107,11 +107,13 @@ module Elscripto # :nodoc:
     end
     
     def first_run?
-      global_conf_file = File.join(GLOBAL_CONF_PATHS[platform],'elscripto.conf.yml')
+      global_conf_file = File.join(GLOBAL_CONF_PATHS[platform],'_default.conf')
       
       case platform
       when :osx,:linux
         unless File.exists?(global_conf_file)
+          require 'fileutils'
+          FileUtils.mkdir_p(GLOBAL_CONF_PATHS[platform])
           File.open(global_conf_file,'w') do |f|
             f.write(File.read(File.join(File.dirname(__FILE__),'..','..','config','elscripto.conf.yml')))
           end
@@ -126,7 +128,7 @@ module Elscripto # :nodoc:
           raise Elscripto::AlreadyInitializedError.new
         else
           File.open(CONFIG_FILE,'w') do |f|
-            f.write File.read(File.join(File.dirname(__FILE__),'..','..','config','elscripto.init.yml')).gsub('{{GLOBAL_CONF_PATH}}',self.global_conf_path + '/elscripto.conf.yml')
+            f.write File.read(File.join(File.dirname(__FILE__),'..','..','config','elscripto.init.yml')).gsub('{{GLOBAL_CONF_PATH}}',self.global_conf_path)
           end
         end
       end
