@@ -36,7 +36,7 @@ module Elscripto # :nodoc:
     def initialize opts_file, opts = {}
       @commands = []
       @generated_script = ""
-      @platform = self.class.get_platform(Config::CONFIG['host_os'])
+      @platform = self.class.get_platform(RbConfig::CONFIG['host_os'])
       first_run?
       @enviroment = opts.delete(:enviroment) || :production
       config_file = opts_file ? opts_file : CONFIG_FILE
@@ -112,7 +112,7 @@ module Elscripto # :nodoc:
       end
 
       def global_conf_path
-        Elscripto::GLOBAL_CONF_PATHS[self.get_platform(Config::CONFIG['host_os'])]
+        Elscripto::GLOBAL_CONF_PATHS[self.get_platform(RbConfig::CONFIG['host_os'])]
       end
 
       # Determine the platform we're running on

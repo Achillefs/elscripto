@@ -25,12 +25,14 @@ def run(command)
           app.exec!
         rescue Elscripto::NoDefinitionsError
           puts "\nNo script definitions found in .elscripto\n".red
+        rescue Elscripto::UnsupportedOSException
+          puts "\n#{Elscripto::App.get_platform(RbConfig::CONFIG['host_os'])} is not currently supported. Sorry\n".red
         end
       else
         print "No configuration found, initializing...".yellow
         Elscripto::App.init!
         puts "done.".green
-        puts "Before continuing, update ./.elscripto with the desired script definitions".yello
+        puts "Before continuing, update ./.elscripto with the desired script definitions".yellow
       end
     end
   else # valid command?
