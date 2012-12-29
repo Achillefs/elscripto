@@ -1,6 +1,4 @@
-# El Scripto Spectacularrr
-
-[![Build Status](https://travis-ci.org/Achillefs/elscripto.png?branch=master)](https://travis-ci.org/Achillefs/elscripto)
+# El Scripto Spectacularrr [![Build Status](https://travis-ci.org/Achillefs/elscripto.png?branch=master)](https://travis-ci.org/Achillefs/elscripto)
 
 elscripto is a command line automator. It was initially written to start up a few OSX Terminal tabs that I used for Rails development. At first it was just a ruby script with a few hardcoded commands, but it slowly evolved into the nifty little configurable command line utility you see here.
 
