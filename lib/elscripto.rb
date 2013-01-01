@@ -1,3 +1,3 @@
-Dir[File.join(%W{. lib elscripto *.rb})].each {|f| require f}
+%W{app command version}.each {|r| require "elscripto/#{r}"}
 module Elscripto
 end
