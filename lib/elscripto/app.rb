@@ -22,7 +22,11 @@ module Elscripto # :nodoc:
   
   class NoDefinitionsError < Exception # :nodoc:
     def initialize
-      super "No definitions in your configuration file. What's the deal, guy?"
+      super "No commands or definitions gived.\n
+You need to specify at least one of the following: 
+  --file CONFIG_FILE
+  --commands CMD1;CMD2...
+  --definitions DEF1;DE2..."
     end
   end
   
@@ -36,31 +40,72 @@ module Elscripto # :nodoc:
   # Initialize it by passing a config file to it. 
   # Default file path is <current_dir>/.elscripto
   class App
-    attr_accessor :commands, :platform, :enviroment, :generated_script
+    attr_accessor :command, :opts, :commands, :platform, :enviroment, :generated_script
     CONFIG_FILE = File.join('.','.elscripto')
     
-    def initialize opts_file, opts = {}
+    def initialize opts
+      @opts = opts
       @commands = []
+      @command = @opts.command
       @generated_script = ""
       @platform = self.class.get_platform(RbConfig::CONFIG['host_os'])
       first_run?
-      @enviroment = opts.delete(:enviroment) || :production
-      config_file = opts_file ? opts_file : CONFIG_FILE
-      raise ArgumentError.new "Elscripto needs a config file spectacularrr" unless File.exists?(config_file)
-      opts = YAML.load_file(config_file)
-      raise Elscripto::NoDefinitionsError.new unless opts['commands'].class == Array
-      opts['commands'].each do |cmd|
+      @enviroment = @opts.enviroment
+      
+      if @command == 'start'
+        expand_commands!
+        add_adhoc_commands!
+        raise NoDefinitionsError if @commands.size == 0
+      end
+    end
+    
+    def expand_commands!
+      # load configuration from file
+      if File.exists?(@opts.config_file)
+        file_opts = YAML.load_file(@opts.config_file)
+        @commands << file_opts['commands'] if file_opts['commands'].class == Array
+      end
+      # add in definitions
+      @commands << @opts.definitions unless @opts.definitions.size == 0
+      
+      @commands = @commands.flatten.map do |cmd|
         case cmd.class.to_s
         when 'Hash'
-          @commands << Command.new(cmd['name'], :command => cmd['command'])
+          Command.new(cmd['name'], :command => cmd['command'])
         when 'String'
-          @commands << Command.new(cmd)
+          Command.new(cmd)
         end
       end
     end
     
+    def add_adhoc_commands!
+      # add in incoming adhoc commands
+      i = 1
+      @opts.commands.each do |c|
+        @commands << Command.new("cmd#{i}",:command => c)
+        i+=1
+      end
+    end
+    
     def exec!
+      send(@command.to_sym)
+    end
+    
+    def init
+      print "\nInitializing elscripto...".yellow
+      begin
+        self.class.init!
+        puts_unless_test " done."
+        puts_unless_test "Before continuing, update ./.elscripto with the desired script definitions\n\n".yellow
+      rescue Elscripto::AlreadyInitializedError
+        puts_unless_test " nah, it's already there!\n".green
+      end
+    end
+    
+    def start
       raise Elscripto::NoDefinitionsError.new if self.commands.size == 0
+      
+      puts_unless_test 'Starting ElScripto Spctacularrr!'.green
       case self.platform
       # tell application "Terminal"
       # 	activate
@@ -153,9 +198,13 @@ done}
           File.open(global_conf_file,'w') do |f|
             f.write(File.read(File.join(File.dirname(__FILE__),'..','..','config','elscripto.conf.yml')))
           end
-          puts "Wrote global configuration to #{global_conf_file}".yellow
+          puts_unless_test "Wrote global configuration to #{global_conf_file}".yellow
         end
       end
+    end
+    
+    def puts_unless_test msg
+      puts msg unless enviroment == :test
     end
     
     class << self

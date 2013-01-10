@@ -16,7 +16,7 @@ describe Elscripto::App do
     end
   end
   
-  subject { Elscripto::App.new 'spec/files/sample_options.yml', :enviroment => :development }
+  subject { Elscripto::App.new(Elscripto::Options.parse('start',%W{-e test -d spork;autotest;rails:server;rails:console})) }
   
   describe 'with valid options' do
     it { subject.commands.size.should eq(4) }
@@ -27,12 +27,18 @@ describe Elscripto::App do
   end
   
   describe 'with invalid options' do
-    subject { Elscripto::App.new 'spec/files/nonexistent_command.yml' }
+    subject { 
+      conf = Elscripto::Options.parse('start',%W{-f spec/files/nonexistent_command.yml})
+      Elscripto::App.new(conf) 
+    }
     it { expect { subject }.to raise_error(ArgumentError) }
   end
   
   describe 'with inline command input' do
-    subject { Elscripto::App.new 'spec/files/new_definition.yml' }
+    subject { 
+      conf = Elscripto::Options.parse('start',%W{-f spec/files/new_definition.yml})
+      Elscripto::App.new(conf) 
+    }
     it { subject.commands.last.system_call.should eq('rake log:clear') }
     it { subject.commands.last.name.should eq('rails:logs') }
   end
@@ -65,7 +71,7 @@ describe Elscripto::App do
     end
     
     describe "with no definitions" do
-      it { expect { Elscripto::App.new('spec/files/empty.yml') }.to raise_error(Elscripto::NoDefinitionsError) }
+      it { expect { Elscripto::App.new(Elscripto::Options.parse('start',[])) }.to raise_error(Elscripto::NoDefinitionsError) }
     end
   end
 end

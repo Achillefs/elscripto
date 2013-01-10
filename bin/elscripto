@@ -1,44 +1,17 @@
 #!/usr/bin/env ruby
 require 'rubygems'
 require 'elscripto'
+require 'optparse'
 require 'nutrun-string'
 
-def run(command)
-  executable_name = File.basename($PROGRAM_NAME)
-  
-  if command != nil and %{init start --version}.include?(command) # valid command?
-    case command
-    when 'init'
-      print "\nInitializing elscripto...".yellow
-      begin
-        Elscripto::App.init!
-        puts " done."
-        puts "Before continuing, update ./.elscripto with the desired script definitions\n\n".yellow
-      rescue Elscripto::AlreadyInitializedError
-        puts " nah, it's already there!\n".green
-      end
-    when 'start'
-      if File.exists? Elscripto::App::CONFIG_FILE
-        begin
-          app = Elscripto::App.new(Elscripto::App::CONFIG_FILE)
-          puts 'Starting ElScripto Spctacularrr!'.green
-          app.exec!
-        rescue Elscripto::NoDefinitionsError,Elscripto::UnsupportedOSError,Elscripto::LaunchFailedError => e
-          puts "\n#{e.message}\n".red
-        end
-      else
-        print "No configuration found, initializing...".yellow
-        Elscripto::App.init!
-        puts "done.".green
-        puts "Before continuing, update ./.elscripto with the desired script definitions".yellow
-      end
-    when '--version', '-v'
-      puts "\n#{executable_name.capitalize} version #{Elscripto::VERSION}".white
-      puts "(c) 2012, Achillefs Charmpilas\n".green
-    end
-  else # valid command?
-    puts "\nUsage: #{executable_name} init|start\n".white
-  end # valid command?
+begin
+  command = Elscripto::Options::VALID_COMMANDS.include?(ARGV[0]) ? ARGV[0] : ''
+  options = Elscripto::Options.parse command, ARGV
+  app = Elscripto::App.new(options)
+  app.exec!
+rescue Elscripto::InvalidCommandError,
+  Elscripto::NoDefinitionsError, Elscripto::UnsupportedOSError,
+  Elscripto::AlreadyInitializedError, Elscripto::LaunchFailedError => e
+  puts "\nElscripto error: #{e.message}\n".red
+  puts e.backtrace.join("\n") if options.enviroment == :development
 end
-
-run(ARGV[0]) unless ENV['NO_RUN']
