@@ -8,3 +8,6 @@
   rails:compass: 'compass watch'
   rails:watchr: 'watchr ./config/specs.watchr'
   test: "echo 'SPECTACULARRR!'"
+  git:pull: 'git pull'
+  svn:up: 'svn update'
+  textmate: 'mate .'
