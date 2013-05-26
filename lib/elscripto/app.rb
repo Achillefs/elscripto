@@ -117,9 +117,12 @@ You need to specify at least one of the following:
       # 	do script "clear && echo \"--STARTING AUTOTEST--\" && cd Sites/tabbo/ && autotest" in front window
       # end tell
       when :osx
+        def escape_quotes s
+          s.gsub('"', '\"')
+        end
         @generated_script = %{tell application "Terminal"\n}
         @generated_script<< %{activate\n}
-        @generated_script<< commands.map { |cmd| %{tell application "System Events" to keystroke "t" using command down\ndelay 0.5\ndo script "clear && echo \\"-- Running #{cmd.name} Spectacularrr --\\" && #{cmd.system_call}" in front window} }.join("\n")
+        @generated_script<< commands.map { |cmd| %{tell application "System Events" to keystroke "t" using command down\ndelay 0.5\ndo script "clear && echo \\"-- Running #{escape_quotes cmd.name} Spectacularrr --\\" && #{escape_quotes cmd.system_call}" in front window} }.join("\n")
         @generated_script<< "\nend tell"
         if self.enviroment == :production
           begin
