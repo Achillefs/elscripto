@@ -1,4 +1,6 @@
 #!/usr/bin/env ruby
+# frozen_string_literal: true
+
 require 'rubygems'
 require 'elscripto'
 require 'optparse'
@@ -10,8 +12,8 @@ begin
   app = Elscripto::App.new(options)
   app.exec!
 rescue Elscripto::InvalidCommandError,
-  Elscripto::NoDefinitionsError, Elscripto::UnsupportedOSError,
-  Elscripto::AlreadyInitializedError, Elscripto::LaunchFailedError => e
+       Elscripto::NoDefinitionsError, Elscripto::UnsupportedOSError,
+       Elscripto::AlreadyInitializedError, Elscripto::LaunchFailedError => e
   puts "\nElscripto error: #{e.message}\n".red
-  puts e.backtrace.join("\n") if options.enviroment == :development
+  puts e.backtrace.join("\n") if options && options.enviroment == :development
 end
